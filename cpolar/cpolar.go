@@ -3,12 +3,15 @@ package cpolar
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/ruokeqx/cpolarPorter/env"
 )
+
+var ErrTokenExpired error = errors.New("50014")
 
 const ApiLogin = "/api/v1/user/login"
 const ApiTunnels = "/api/v1/tunnels"
@@ -92,11 +95,19 @@ func (cc *CpolarConnector) Tunnels() ([]Tunnel, error) {
 	if err != nil {
 		return nil, err
 	}
-	var ret []Tunnel
-	for _, item := range r.Data.Items {
-		if item.Status == "active" {
-			ret = append(ret, item.PublishTunnels...)
+
+	switch r.Code {
+	case 20000:
+		var ret []Tunnel
+		for _, item := range r.Data.Items {
+			if item.Status == "active" {
+				ret = append(ret, item.PublishTunnels...)
+			}
 		}
+		return ret, nil
+	case 50014:
+		return nil, fmt.Errorf("%w:%s", ErrTokenExpired, r.Message)
+	default:
+		return nil, fmt.Errorf("%d:%s", r.Code, r.Message)
 	}
-	return ret, nil
 }

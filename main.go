@@ -25,7 +25,7 @@ func main() {
 
 	dnsProvidor, err := alidns.NewDNSProvider()
 	if err != nil {
-		fmt.Print(err.Error())
+		fmt.Println(err.Error())
 		return
 	}
 
@@ -33,14 +33,14 @@ func main() {
 	for {
 		err := cc.Login()
 		if err != nil {
-			fmt.Print(err.Error())
+			fmt.Println(err.Error())
 			time.Sleep(time.Hour)
 			continue
 		}
 	tunnel:
 		tunnels, err := cc.Tunnels()
 		if err != nil {
-			fmt.Print(err.Error())
+			fmt.Println(err.Error())
 			continue
 		}
 
@@ -51,12 +51,12 @@ func main() {
 
 			err = dnsProvidor.CleanUp(domain, RR)
 			if err != nil {
-				fmt.Print(err.Error())
+				fmt.Println(err.Error())
 				return
 			}
 			err = dnsProvidor.Present(domain, RR, string(mb))
 			if err != nil {
-				fmt.Print(err.Error())
+				fmt.Println(err.Error())
 				return
 			}
 			fmt.Println("success")
